@@ -15,7 +15,7 @@ Script gets its  configuration from environment variables or from .env file(see 
 ### Running script in docker:
 
 ```
-docker run --env-file .env --name pmacct-kafka-vm kvitex/pmacct-kafka-vm
+docker run --env-file .env --name pmacct-kafka-vm -p 9003:9003 kvitex/pmacct-kafka-vm 
 ```
 
 ### Variables:
