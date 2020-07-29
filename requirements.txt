@@ -1,0 +1,5 @@
+prometheus_client
+kafka
+requests
+pytz
+python-dotenv
