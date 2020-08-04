@@ -4,6 +4,16 @@ Flow statistics is expected to be produced  by [Pmacct] flow collector kafka plu
 Script calls import api of [Victoria Metrics] to store data.\
 Prometheus client is used to expose total count of sample processed. Metrics can be scraped at "/metrics" path. Default port is "9003".
 
+Scripts uses `stamp_updated` as a timestamp for metric in [Victoria Metrics].\
+You have to set `kafka_history` and `kafka_history_roundoff` options in sfacct.conf or nfacct.conf.
+
+Example:
+```
+plugins: kafka[kafka]
+kafka_history[kafka]: 5m
+kafka_history_roundoff[kafka]: m
+```
+
 ### Runnig the script
 
 Just run:
