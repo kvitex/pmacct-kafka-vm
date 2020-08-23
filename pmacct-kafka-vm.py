@@ -20,15 +20,15 @@ ssl_verify               = not os.environ.get('VM_SSL_VERIFY','True') in ssl_ver
 vm_import_path           = os.environ.get('VM_IMPORT_PATH','/api/v1/import')
 vm_instance              = os.environ['VM_INSTANCE']
 vm_job                   = os.environ['VM_JOB']
-vm_metric_name           = os.environ.get('VM_METRIC_NAME','bytes')
-avoid_lables_str         = os.environ.get('VM_AVOID_LABELS','bytes,stamp_updated')
+vm_metrics_names_str     = os.environ.get('VM_METRICS_NAMES','bytes,packets')
+avoid_lables_str         = os.environ.get('VM_AVOID_LABELS','bytes,packets,stamp_updated')
 vm_max_samples_per_send  = int(os.environ.get('VM_MAX_SAMPLES_PER_SEND','1000'))
 vm_max_time_to_send      = int(os.environ.get('VM_MAX_TIME_TO_SEND','10'))
 prometheus_client_port   = int(os.environ.get('PROMETHEUS_CLIENT_PORT','9003'))
 
 
-
-avoid_labels               =set(avoid_lables_str.split(',')) 
+vm_metrics_set           = set(vm_metrics_names_str.split(','))
+avoid_labels             = set(avoid_lables_str.split(',')) 
 timestmap_template       = '%Y-%m-%d %H:%M:%S'
 
 def nowstamp():
@@ -53,21 +53,22 @@ def main():
     samples_max_count = 0
     for message in consumer:
         metric_timestamp = int(datetime.strptime(message.value['stamp_updated'],timestmap_template).replace(tzinfo=pytz.utc).timestamp()) * 1000
-        metric_value = message.value['bytes']
-        vm_records.append(
-            dumps(
-                    {'metric': {
-                                **{'__name__': vm_metric_name,
-                                'job': vm_job,
-                                'instance': vm_instance,
-                                },
-                                **{k:str(message.value[k]) for k in message.value if k not in avoid_labels}
-                                },
-                     'values'    : [metric_value],
-                     'timestamps': [metric_timestamp]
-                    }
+        for vm_metric_name in vm_metrics_set:
+            metric_value = message.value[vm_metric_name]
+            vm_records.append(
+                dumps(
+                        {'metric': {
+                                    **{'__name__': vm_metric_name,
+                                    'job': vm_job,
+                                    'instance': vm_instance,
+                                    },
+                                    **{k:str(message.value[k]) for k in message.value if k not in avoid_labels}
+                                    },
+                        'values'    : [metric_value],
+                        'timestamps': [metric_timestamp]
+                        }
+                    )
                 )
-            )
         samples_counter.inc()
         samples_max_count += 1
         if (samples_max_count > vm_max_samples_per_send) or ((int(datetime.now().timestamp()) - samples_timer) > vm_max_time_to_send):
@@ -77,7 +78,6 @@ def main():
           samples_timer = int(datetime.now().timestamp())
           samples_max_count = 0
           vm_records = []
-
     return
 
 if __name__ == "__main__":
