@@ -72,12 +72,12 @@ def main():
         samples_counter.inc()
         samples_max_count += 1
         if (samples_max_count > vm_max_samples_per_send) or ((int(datetime.now().timestamp()) - samples_timer) > vm_max_time_to_send):
-          r = requests.post(f'{vm_url}/{vm_import_path}', data=bytes('\n'.join(vm_records), encoding = 'utf-8'))
-          print(f'{nowstamp()} {r}')
-          print(f'{nowstamp()} Sent {samples_max_count} samples')
-          samples_timer = int(datetime.now().timestamp())
-          samples_max_count = 0
-          vm_records = []
+            r = requests.post(f'{vm_url}/{vm_import_path}', data=bytes('\n'.join(vm_records), encoding = 'utf-8'))
+            print(f'{nowstamp()} {r}')
+            print(f'{nowstamp()} Sent {samples_max_count} samples')
+            samples_timer = int(datetime.now().timestamp())
+            samples_max_count = 0
+            vm_records = []
     return
 
 if __name__ == "__main__":
