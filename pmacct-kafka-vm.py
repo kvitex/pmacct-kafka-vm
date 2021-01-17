@@ -29,7 +29,7 @@ prometheus_client_port   = int(os.environ.get('PROMETHEUS_CLIENT_PORT','9003'))
 
 vm_metrics_set           = set(vm_metrics_names_str.split(','))
 avoid_labels             = set(avoid_lables_str.split(',')) 
-timestmap_template       = '%Y-%m-%d %H:%M:%S'
+timestamp_template       = '%Y-%m-%d %H:%M:%S'
 
 def nowstamp():
     return str(datetime.now())
@@ -52,7 +52,7 @@ def main():
     samples_timer = int(datetime.now().timestamp())
     samples_max_count = 0
     for message in consumer:
-        metric_timestamp = int(datetime.strptime(message.value['stamp_updated'],timestmap_template).replace(tzinfo=pytz.utc).timestamp()) * 1000
+        metric_timestamp = int(datetime.strptime(message.value['stamp_updated'],timestamp_template).replace(tzinfo=pytz.utc).timestamp()) * 1000
         for vm_metric_name in vm_metrics_set:
             metric_value = message.value[vm_metric_name]
             vm_records.append(
